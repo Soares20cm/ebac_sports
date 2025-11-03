@@ -1,7 +1,7 @@
 import { Produto as ProdutoType } from '../../store/api/productsApi'
 import * as S from './styles'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
-import { addToCart } from '../../store/slices/cartSlice'
+import { addToCart, selectIsInCart } from '../../store/slices/cartSlice'
 import {
   toggleFavorite,
   selectIsFavorite
@@ -19,9 +19,12 @@ export const paraReal = (valor: number) =>
 const ProdutoComponent = ({ produto }: Props) => {
   const dispatch = useAppDispatch()
   const estaNosFavoritos = useAppSelector(selectIsFavorite(produto.id))
+  const estaNoCarrinho = useAppSelector(selectIsInCart(produto.id))
 
   const handleAddToCart = () => {
-    dispatch(addToCart(produto))
+    if (!estaNoCarrinho) {
+      dispatch(addToCart(produto))
+    }
   }
 
   const handleToggleFavorite = () => {
@@ -42,8 +45,16 @@ const ProdutoComponent = ({ produto }: Props) => {
           ? '- Remover dos favoritos'
           : '+ Adicionar aos favoritos'}
       </S.BtnComprar>
-      <S.BtnComprar onClick={handleAddToCart} type="button">
-        Adicionar ao carrinho
+      <S.BtnComprar
+        onClick={handleAddToCart}
+        type="button"
+        disabled={estaNoCarrinho}
+        style={{
+          opacity: estaNoCarrinho ? 0.6 : 1,
+          cursor: estaNoCarrinho ? 'not-allowed' : 'pointer'
+        }}
+      >
+        {estaNoCarrinho ? 'Já no carrinho' : 'Adicionar ao carrinho'}
       </S.BtnComprar>
     </S.Produto>
   )
